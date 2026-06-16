@@ -1,4 +1,23 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
+
+// 화면 너비 기반 카드 크기 계산
+function useCardSize() {
+  const [sizes, setSizes] = useState({ opp: 38, field: 46, hand: 52 });
+  useEffect(() => {
+    function calc() {
+      const vw = Math.min(window.innerWidth, 480);
+      setSizes({
+        opp:   Math.floor((vw - 32) / 8.5),   // 뒷면 (7장 + 여백)
+        field: Math.floor((vw - 28) / 7),       // 바닥 (6장)
+        hand:  Math.floor((vw - 28) / 7.5),     // 손패 (7장)
+      });
+    }
+    calc();
+    window.addEventListener('resize', calc);
+    return () => window.removeEventListener('resize', calc);
+  }, []);
+  return sizes;
+}
 import { CARDS, MONTH_KR, shuffle, calcScore, getBreakdown } from "./cards";
 import { CardSVG } from "./CardSVG";
 import "./App.css";
@@ -150,6 +169,7 @@ function GameScreen({ G, logs, onSelectCard, onConfirmPlay, onGoStop }) {
   const oppSc = calcScore(G.captured[opp]);
   const myCap = G.captured[cur];
   const oppCap = G.captured[opp];
+  const sz = useCardSize();
 
   return (
     <div className="game-wrap">
@@ -159,8 +179,8 @@ function GameScreen({ G, logs, onSelectCard, onConfirmPlay, onGoStop }) {
           <span>👤 {NAMES[opp]}</span>
           <span>{oppSc}점 | {oppCap.length}장</span>
         </div>
-        <div className="cards-row">
-          {G.hands[opp].map(c => <CardSVG key={c.id} card={c} size={40} faceDown />)}
+        <div className="cards-row no-wrap">
+          {G.hands[opp].map(c => <CardSVG key={c.id} card={c} size={sz.opp} faceDown />)}
         </div>
         <div className="cap-summary">
           광{oppCap.filter(c=>c.t==='gwang').length} 열{oppCap.filter(c=>c.t==='animal').length} 띠{oppCap.filter(c=>c.t==='ribbon').length} 피{oppCap.filter(c=>c.t==='junk'||c.t==='junk2').reduce((s,c)=>s+c.junkPts,0)}
@@ -173,8 +193,8 @@ function GameScreen({ G, logs, onSelectCard, onConfirmPlay, onGoStop }) {
           <span>🎴 바닥 ({G.field.length}장)</span>
           <span>덱 {G.deck.length}장</span>
         </div>
-        <div className="cards-row">
-          {G.field.map(c => <CardSVG key={c.id} card={c} size={44} />)}
+        <div className="cards-row no-wrap">
+          {G.field.map(c => <CardSVG key={c.id} card={c} size={sz.field} />)}
         </div>
         {G.drawn && <div className="drawn-info">뒤집은 패: {MONTH_KR[G.drawn.m-1]}</div>}
       </div>
@@ -190,7 +210,7 @@ function GameScreen({ G, logs, onSelectCard, onConfirmPlay, onGoStop }) {
       {isGostop && (
         <div className="gostop-box">
           <div className="gostop-title">🏆 {sc}점 달성! {G.goCount[cur] > 0 ? `(고 ${G.goCount[cur]}회 진행 중)` : ""}</div>
-          <div style={{ display: "flex", gap: 12, justifyContent: "center" }}>
+          <div className="gostop-btns">
             <button className="btn-red" onClick={() => onGoStop("go")}>고!</button>
             <button className="btn-gold" onClick={() => onGoStop("stop")}>스톱!</button>
           </div>
@@ -206,9 +226,9 @@ function GameScreen({ G, logs, onSelectCard, onConfirmPlay, onGoStop }) {
         <div className="cap-summary">
           광{myCap.filter(c=>c.t==='gwang').length} 열{myCap.filter(c=>c.t==='animal').length} 띠{myCap.filter(c=>c.t==='ribbon').length} 피{myCap.filter(c=>c.t==='junk'||c.t==='junk2').reduce((s,c)=>s+c.junkPts,0)}
         </div>
-        <div className="cards-row my-hand">
+        <div className="cards-row no-wrap my-hand">
           {G.hands[cur].map(c => (
-            <CardSVG key={c.id} card={c} size={50}
+            <CardSVG key={c.id} card={c} size={sz.hand}
               selected={G.selected === c.id}
               onClick={isSelect ? () => onSelectCard(c) : undefined}
             />

@@ -1,3 +1,5 @@
+* { -webkit-tap-highlight-color: transparent; touch-action: manipulation; }
+
 .screen {
   width: 100%;
   max-width: 480px;
@@ -5,7 +7,6 @@
   display: flex;
   flex-direction: column;
 }
-
 .screen.center {
   align-items: center;
   justify-content: center;
@@ -14,66 +15,67 @@
 }
 
 .title-gold {
-  font-size: 30px;
+  font-size: clamp(22px, 7vw, 30px);
   font-weight: 900;
   letter-spacing: 6px;
   color: #c9a84c;
   margin-bottom: 4px;
 }
+.subtitle { color: #aaa; font-size: 13px; margin-bottom: 20px; }
 
-.subtitle {
-  color: #aaa;
-  font-size: 13px;
-  margin-bottom: 20px;
-}
-
+/* 버튼 - 터치 최소 44px */
 .btn-gold {
   background: #c9a84c;
   color: #1a1a1a;
   border: none;
   border-radius: 12px;
   padding: 14px 40px;
-  font-size: 16px;
+  font-size: clamp(15px, 4vw, 17px);
   font-weight: 700;
   cursor: pointer;
   font-family: inherit;
-  transition: opacity 0.1s;
+  min-height: 50px;
+  transition: opacity 0.1s, transform 0.1s;
 }
-.btn-gold:hover { opacity: 0.9; }
+.btn-gold:active { transform: scale(0.97); opacity: 0.85; }
 .btn-gold:disabled { opacity: 0.4; cursor: not-allowed; }
-.btn-gold.full-width { width: 100%; margin-top: 10px; padding: 13px 0; }
+.btn-gold.full-width { width: 100%; margin-top: 10px; padding: 15px 0; font-size: 16px; }
 
 .btn-ghost {
   background: transparent;
   color: #aaa;
   border: 1px solid #555;
   border-radius: 10px;
-  padding: 10px 24px;
+  padding: 12px 24px;
   font-size: 13px;
   cursor: pointer;
   font-family: inherit;
+  min-height: 44px;
 }
-.btn-ghost:hover { border-color: #888; color: #ccc; }
+.btn-ghost:active { background: rgba(255,255,255,0.05); }
 
 .btn-red {
   background: #8b2020;
   color: white;
   border: none;
   border-radius: 10px;
-  padding: 12px 28px;
-  font-size: 18px;
+  padding: 14px 32px;
+  font-size: clamp(16px, 5vw, 20px);
   font-weight: 900;
   cursor: pointer;
   font-family: inherit;
+  min-height: 50px;
 }
+.btn-red:active { transform: scale(0.97); }
 
 .rules-box {
   background: rgba(0,0,0,0.4);
   border-radius: 12px;
   padding: 14px 18px;
-  font-size: 12px;
+  font-size: clamp(11px, 3vw, 13px);
   line-height: 2;
-  max-width: 300px;
+  max-width: 320px;
+  width: 100%;
   text-align: left;
   color: #ccc;
   margin-top: 4px;
@@ -82,27 +84,29 @@
 .pass-box {
   background: rgba(0,0,0,0.5);
   border-radius: 20px;
-  padding: 36px 48px;
+  padding: 36px 40px;
   text-align: center;
+  width: 90%;
+  max-width: 340px;
 }
 
-/* Game */
+/* ── 게임 레이아웃 ── */
 .game-wrap {
   width: 100%;
   max-width: 480px;
-  padding: 10px;
+  padding: 8px;
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 6px;
   min-height: 100vh;
+  box-sizing: border-box;
 }
 
 .section {
   background: rgba(0,0,0,0.3);
   border-radius: 12px;
-  padding: 10px;
+  padding: 8px 10px;
 }
-
 .opp-section { opacity: 0.75; }
 .my-section { background: rgba(0,0,0,0.45); }
 
@@ -110,25 +114,34 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  font-size: 12px;
+  font-size: clamp(11px, 3vw, 13px);
   color: #aaa;
   margin-bottom: 6px;
 }
 
+/* 카드 행 - 화면 너비에 맞게 자동 크기 조정 */
 .cards-row {
   display: flex;
-  gap: 5px;
+  gap: 4px;
   flex-wrap: wrap;
-  min-height: 60px;
   align-items: center;
+  min-height: 56px;
 }
+.cards-row.no-wrap {
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+  padding-bottom: 2px;
+}
+.cards-row.no-wrap::-webkit-scrollbar { display: none; }
 
-.my-hand { min-height: 74px; }
+.my-hand { min-height: 80px; }
 
 .cap-summary {
-  font-size: 11px;
+  font-size: clamp(10px, 2.5vw, 12px);
   color: #777;
-  margin-bottom: 5px;
+  margin-bottom: 4px;
 }
 
 .drawn-info {
@@ -137,29 +150,31 @@
   color: #c9a84c;
 }
 
-.log-box {
-  padding: 6px 10px;
-}
-
+.log-box { padding: 4px 8px; }
 .log-item {
-  font-size: 12px;
+  font-size: clamp(11px, 3vw, 13px);
   color: #c9a84c;
   margin-bottom: 2px;
 }
-.log-item.old { color: #666; font-size: 11px; }
+.log-item.old { color: #555; font-size: 11px; }
 
 .gostop-box {
   background: rgba(180,60,0,0.2);
   border: 2px solid #c9601a;
   border-radius: 12px;
-  padding: 14px;
+  padding: 14px 10px;
   text-align: center;
 }
 .gostop-title {
-  font-size: 15px;
+  font-size: clamp(14px, 4vw, 17px);
   font-weight: 900;
   color: #c9a84c;
   margin-bottom: 12px;
+}
+.gostop-btns {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
 }
 
 .waiting {
@@ -169,24 +184,32 @@
   font-size: 13px;
 }
 
-/* Result */
+/* 결과 */
 .result-row {
   display: flex;
-  gap: 16px;
+  gap: 12px;
   margin: 12px 0 20px;
+  width: 100%;
+  justify-content: center;
 }
-
 .result-card {
   background: rgba(0,0,0,0.4);
   border-radius: 12px;
-  padding: 16px 20px;
+  padding: 14px 16px;
   text-align: center;
   border: 1px solid transparent;
-  min-width: 130px;
+  flex: 1;
+  max-width: 160px;
 }
 .result-card.winner { border-color: #c9a84c; }
-
 .result-name { font-size: 13px; color: #aaa; margin-bottom: 4px; }
-.result-score { font-size: 32px; font-weight: 900; }
+.result-score { font-size: clamp(26px, 7vw, 32px); font-weight: 900; }
 .result-detail { font-size: 11px; color: #aaa; margin-top: 2px; }
 .result-go { font-size: 11px; color: #c9a84c; margin-top: 4px; }
+
+/* 모바일 세로 전용 */
+@media (max-width: 390px) {
+  .game-wrap { padding: 6px; gap: 5px; }
+  .section { padding: 7px 8px; }
+  .pass-box { padding: 28px 24px; }
+}
