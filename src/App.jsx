@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import { CARDS, MONTH_KR, shuffle, calcScore, getBreakdown } from "./cards";
-import { CardSVG } from "./CardSVG";
+import { CardSVG } from "./CardImage";
 import { SFX } from "./sound";
 import { aiPickCard, aiDecideStop } from "./ai";
 import "./App.css";
