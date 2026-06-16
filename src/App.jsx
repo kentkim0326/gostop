@@ -150,12 +150,14 @@ export default function App() {
       }
 
       const sc = calcScore(cap);
-      // 플레이어 손패가 0장이면 AI 턴 후 종료
-      const nextPhase = sc >= 3 ? 'gostop' : 'ai_turn';
-      setG(g => ({
-        ...g, deck: newDeck, field, playerCap: cap, drawn,
-        phase: g.playerHand.length === 0 ? 'ai_turn' : nextPhase,
-      }));
+      // 손패 0장이면 바로 결과 (고스톱 기회 없이 종료)
+      const handEmpty = G.playerHand.length === 0;
+      const deckEmpty = newDeck.length === 0;
+      let nextPhase;
+      if (handEmpty || deckEmpty) nextPhase = 'result';
+      else if (sc >= 3) nextPhase = 'gostop';
+      else nextPhase = 'ai_turn';
+      setG(g => ({ ...g, deck: newDeck, field, playerCap: cap, drawn, phase: nextPhase }));
     }, 500);
     return () => clearTimeout(timer);
   }, [G?.phase]);
@@ -211,7 +213,10 @@ export default function App() {
         }));
       } else {
         // 플레이어 손패 0장이거나 덱 0장이면 종료
-        const nextPhase = (G.playerHand.length === 0 || newDeck.length === 0) ? 'result' : 'player_select';
+        const handEmpty = G.playerHand.length === 0;
+        const deckEmpty = newDeck.length === 0;
+        const aiHandEmpty = newAiHand.length === 0;
+        const nextPhase = (handEmpty || deckEmpty || aiHandEmpty) ? 'result' : 'player_select';
         setG(g => ({
           ...g, aiHand: newAiHand, deck: newDeck,
           field: r2.field, aiCap: r2.cap, drawn,
