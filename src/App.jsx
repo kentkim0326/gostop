@@ -120,6 +120,7 @@ export default function App() {
       flashCards(matched.map(c => c.id));
     }
 
+    // 손패 다 냈으면 드로우 후 종료
     setG(g => ({ ...g, playerHand: newHand, field, playerCap: cap, selected: null, phase: 'player_draw' }));
   }
 
@@ -149,9 +150,11 @@ export default function App() {
       }
 
       const sc = calcScore(cap);
+      // 플레이어 손패가 0장이면 AI 턴 후 종료
+      const nextPhase = sc >= 3 ? 'gostop' : 'ai_turn';
       setG(g => ({
         ...g, deck: newDeck, field, playerCap: cap, drawn,
-        phase: sc >= 3 ? 'gostop' : 'ai_turn',
+        phase: g.playerHand.length === 0 ? 'ai_turn' : nextPhase,
       }));
     }, 500);
     return () => clearTimeout(timer);
@@ -172,7 +175,7 @@ export default function App() {
   useEffect(() => {
     if (!G || G.phase !== 'ai_turn') return;
     const timer = setTimeout(() => {
-      if (G.aiHand.length === 0 || G.deck.length === 0) {
+      if (G.aiHand.length === 0 || G.deck.length === 0 || G.playerHand.length === 0 && G.deck.length === 0) {
         setG(g => ({ ...g, phase: 'result' })); return;
       }
 
@@ -207,10 +210,12 @@ export default function App() {
           phase: 'result', lastWinner: 'ai',
         }));
       } else {
+        // 플레이어 손패 0장이거나 덱 0장이면 종료
+        const nextPhase = (G.playerHand.length === 0 || newDeck.length === 0) ? 'result' : 'player_select';
         setG(g => ({
           ...g, aiHand: newAiHand, deck: newDeck,
           field: r2.field, aiCap: r2.cap, drawn,
-          phase: 'player_select',
+          phase: nextPhase,
         }));
       }
     }, 900);
