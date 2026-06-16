@@ -107,14 +107,15 @@ export default function App() {
     const { field, cap, matched } = matchCards(card, G.field, G.playerCap);
 
     if (same.length === 0) {
-      SFX.play();
-      addLog(`${MONTH_KR[card.m-1]} 버림`);
+      SFX.discard();
+      addLog(`😞 ${MONTH_KR[card.m-1]} 버림`);
     } else if (same.length >= 2) {
       SFX.sweep();
       addLog(`✨ ${MONTH_KR[card.m-1]} 3장 쓸기!`);
       flashCards(matched.map(c => c.id));
     } else {
-      SFX.match();
+      if (matched.find(c => c.t === 'gwang')) SFX.gwang();
+      else SFX.match();
       addLog(`${MONTH_KR[card.m-1]} 매칭!`);
       flashCards(matched.map(c => c.id));
     }
@@ -134,13 +135,15 @@ export default function App() {
       SFX.flip();
 
       if (same.length === 0) {
-        addLog(`뒤집기: ${MONTH_KR[drawn.m-1]} → 바닥`);
+        SFX.discard();
+        addLog(`😞 뒤집기: ${MONTH_KR[drawn.m-1]} → 바닥`);
       } else if (same.length >= 2) {
         SFX.sweep();
         addLog(`✨ 뒤집기: ${MONTH_KR[drawn.m-1]} 3장 쓸기!`);
         flashCards(matched.map(c => c.id));
       } else {
-        SFX.match();
+        if (matched.find(c => c.t === 'gwang')) SFX.gwang();
+        else SFX.match();
         addLog(`뒤집기: ${MONTH_KR[drawn.m-1]} 매칭!`);
         flashCards(matched.map(c => c.id));
       }
@@ -196,7 +199,7 @@ export default function App() {
 
       // AI 스톱 결정
       if (aiDecideStop(r2.cap, G.goCount, difficulty)) {
-        SFX.lose();
+        SFX.aiStop();
         addLog(`🤖 AI 스톱! (${calcScore(r2.cap)}점)`);
         setG(g => ({
           ...g, aiHand: newAiHand, deck: newDeck,
