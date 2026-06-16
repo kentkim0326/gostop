@@ -138,11 +138,29 @@
 
 .my-hand { min-height: 80px; }
 
-.cap-summary {
-  font-size: clamp(10px, 2.5vw, 12px);
-  color: #777;
-  margin-bottom: 4px;
+.cap-summary { font-size: 11px; color: #777; margin-bottom: 4px; }
+
+.captured-section { border: 1px solid rgba(255,255,255,0.06); }
+.opp-captured { background: rgba(0,0,0,0.25); }
+.my-captured  { background: rgba(201,168,76,0.08); border-color: rgba(201,168,76,0.2); }
+.field-section { background: rgba(0,60,0,0.35); border: 1px solid rgba(80,160,80,0.2); }
+
+.cap-badges {
+  display: flex;
+  gap: 5px;
+  flex-wrap: wrap;
+  margin-bottom: 2px;
 }
+.badge {
+  font-size: 11px;
+  font-weight: 700;
+  padding: 2px 7px;
+  border-radius: 10px;
+}
+.badge-gwang  { background: rgba(255,215,0,0.18);  color: #ffd700; }
+.badge-animal { background: rgba(80,200,80,0.18);  color: #80d080; }
+.badge-ribbon { background: rgba(200,80,80,0.18);  color: #e08080; }
+.badge-junk   { background: rgba(150,150,150,0.18);color: #aaa; }
 
 .drawn-info {
   margin-top: 6px;

@@ -159,6 +159,22 @@ function PassScreen({ G, onPass }) {
   );
 }
 
+function CapturedSummary({ cap }) {
+  const g = cap.filter(c=>c.t==='gwang').length;
+  const a = cap.filter(c=>c.t==='animal').length;
+  const r = cap.filter(c=>c.t==='ribbon').length;
+  const p = cap.filter(c=>c.t==='junk'||c.t==='junk2').reduce((s,c)=>s+c.junkPts,0);
+  return (
+    <div className="cap-badges">
+      {g>0 && <span className="badge badge-gwang">광 {g}</span>}
+      {a>0 && <span className="badge badge-animal">열 {a}</span>}
+      {r>0 && <span className="badge badge-ribbon">띠 {r}</span>}
+      {p>0 && <span className="badge badge-junk">피 {p}</span>}
+      {g===0&&a===0&&r===0&&p===0 && <span style={{color:'#555',fontSize:11}}>없음</span>}
+    </div>
+  );
+}
+
 function GameScreen({ G, logs, onSelectCard, onConfirmPlay, onGoStop }) {
   const cur = G.cur;
   const opp = 1 - cur;
@@ -170,78 +186,102 @@ function GameScreen({ G, logs, onSelectCard, onConfirmPlay, onGoStop }) {
   const myCap = G.captured[cur];
   const oppCap = G.captured[opp];
   const sz = useCardSize();
+  const capSz = Math.max(28, sz.opp - 6); // 획득패는 더 작게
 
   return (
     <div className="game-wrap">
-      {/* 상대 */}
+
+      {/* ① 상대 손패 (뒷면) */}
       <div className="section opp-section">
         <div className="section-header">
-          <span>👤 {NAMES[opp]}</span>
-          <span>{oppSc}점 | {oppCap.length}장</span>
+          <span>👤 {NAMES[opp]} 손패</span>
+          <span>{G.hands[opp].length}장</span>
         </div>
         <div className="cards-row no-wrap">
           {G.hands[opp].map(c => <CardSVG key={c.id} card={c} size={sz.opp} faceDown />)}
         </div>
-        <div className="cap-summary">
-          광{oppCap.filter(c=>c.t==='gwang').length} 열{oppCap.filter(c=>c.t==='animal').length} 띠{oppCap.filter(c=>c.t==='ribbon').length} 피{oppCap.filter(c=>c.t==='junk'||c.t==='junk2').reduce((s,c)=>s+c.junkPts,0)}
-        </div>
       </div>
 
-      {/* 바닥 */}
-      <div className="section">
+      {/* ② 상대 획득패 */}
+      <div className="section captured-section opp-captured">
+        <div className="section-header">
+          <span>📦 {NAMES[opp]} 획득</span>
+          <span style={{color:'#c9a84c'}}>{oppSc}점 · {oppCap.length}장</span>
+        </div>
+        <CapturedSummary cap={oppCap} />
+        {oppCap.length > 0 && (
+          <div className="cards-row no-wrap" style={{marginTop:4}}>
+            {oppCap.map(c => <CardSVG key={c.id} card={c} size={capSz} />)}
+          </div>
+        )}
+      </div>
+
+      {/* ③ 공용 바닥 + 로그 */}
+      <div className="section field-section">
         <div className="section-header">
           <span>🎴 바닥 ({G.field.length}장)</span>
-          <span>덱 {G.deck.length}장</span>
+          <span style={{color:'#888'}}>덱 {G.deck.length}장</span>
         </div>
         <div className="cards-row no-wrap">
           {G.field.map(c => <CardSVG key={c.id} card={c} size={sz.field} />)}
+          {G.field.length === 0 && <span style={{color:'#555',fontSize:12}}>비어있음</span>}
         </div>
-        {G.drawn && <div className="drawn-info">뒤집은 패: {MONTH_KR[G.drawn.m-1]}</div>}
+        {G.drawn && <div className="drawn-info">↩ 뒤집은 패: {MONTH_KR[G.drawn.m-1]}</div>}
+        <div style={{marginTop:6}}>
+          {logs.slice(0,2).map((l,i)=>(
+            <div key={i} className={`log-item ${i>0?'old':''}`}>{l}</div>
+          ))}
+        </div>
       </div>
 
-      {/* 로그 */}
-      <div className="log-box">
-        {logs.slice(0, 3).map((l, i) => (
-          <div key={i} className={`log-item ${i > 0 ? "old" : ""}`}>{l}</div>
-        ))}
+      {/* ④ 내 획득패 */}
+      <div className="section captured-section my-captured">
+        <div className="section-header" style={{color:'#c9a84c'}}>
+          <span>📦 {NAMES[cur]} 획득</span>
+          <span>{sc}점{G.goCount[cur]>0?` (고×${G.goCount[cur]})`:''} · {myCap.length}장</span>
+        </div>
+        <CapturedSummary cap={myCap} />
+        {myCap.length > 0 && (
+          <div className="cards-row no-wrap" style={{marginTop:4}}>
+            {myCap.map(c => <CardSVG key={c.id} card={c} size={capSz} />)}
+          </div>
+        )}
       </div>
 
       {/* 고스톱 */}
       {isGostop && (
         <div className="gostop-box">
-          <div className="gostop-title">🏆 {sc}점 달성! {G.goCount[cur] > 0 ? `(고 ${G.goCount[cur]}회 진행 중)` : ""}</div>
+          <div className="gostop-title">🏆 {sc}점 달성! {G.goCount[cur]>0?`(고 ${G.goCount[cur]}회 진행 중)`:''}</div>
           <div className="gostop-btns">
-            <button className="btn-red" onClick={() => onGoStop("go")}>고!</button>
-            <button className="btn-gold" onClick={() => onGoStop("stop")}>스톱!</button>
+            <button className="btn-red" onClick={()=>onGoStop('go')}>고!</button>
+            <button className="btn-gold" onClick={()=>onGoStop('stop')}>스톱!</button>
           </div>
         </div>
       )}
 
-      {/* 현재 플레이어 */}
+      {/* ⑤ 내 손패 */}
       <div className="section my-section">
-        <div className="section-header" style={{ color: "#c9a84c" }}>
-          <span>😊 {NAMES[cur]}</span>
-          <span>{sc}점{G.goCount[cur] > 0 ? ` (고×${G.goCount[cur]})` : ""}</span>
-        </div>
-        <div className="cap-summary">
-          광{myCap.filter(c=>c.t==='gwang').length} 열{myCap.filter(c=>c.t==='animal').length} 띠{myCap.filter(c=>c.t==='ribbon').length} 피{myCap.filter(c=>c.t==='junk'||c.t==='junk2').reduce((s,c)=>s+c.junkPts,0)}
+        <div className="section-header" style={{color:'#c9a84c'}}>
+          <span>😊 {NAMES[cur]} 손패</span>
+          <span>{G.hands[cur].length}장</span>
         </div>
         <div className="cards-row no-wrap my-hand">
           {G.hands[cur].map(c => (
             <CardSVG key={c.id} card={c} size={sz.hand}
               selected={G.selected === c.id}
-              onClick={isSelect ? () => onSelectCard(c) : undefined}
+              onClick={isSelect ? ()=>onSelectCard(c) : undefined}
             />
           ))}
         </div>
         {isSelect && (
-          <button className="btn-gold full-width" onClick={onConfirmPlay} disabled={G.selected === null}
-            style={{ opacity: G.selected === null ? 0.4 : 1, cursor: G.selected === null ? "not-allowed" : "pointer" }}>
-            {G.selected !== null ? "✅ 이 패 내기" : "패를 선택하세요"}
+          <button className="btn-gold full-width" onClick={onConfirmPlay} disabled={G.selected===null}
+            style={{opacity:G.selected===null?0.4:1, cursor:G.selected===null?'not-allowed':'pointer'}}>
+            {G.selected!==null ? '✅ 이 패 내기' : '패를 선택하세요'}
           </button>
         )}
         {isDraw && <div className="waiting">⏳ 뒤집는 중...</div>}
       </div>
+
     </div>
   );
 }
