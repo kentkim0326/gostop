@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import { CARDS, MONTH_KR, shuffle, calcScore, getBreakdown } from "./cards";
 import { CardSVG } from "./CardImage";
-import { SFX } from "./sound";
+import { SFX, initAudio } from "./sound";
 import { aiPickCard, aiDecideStop } from "./ai";
 import "./App.css";
 
@@ -71,12 +71,29 @@ function CapturedSummary({ cap }) {
 }
 
 export default function App() {
-  const [screen, setScreen] = useState('home'); // home | difficulty | game | result
+  const [screen, setScreen] = useState('home');
   const [difficulty, setDifficulty] = useState('normal');
   const [G, setG] = useState(null);
   const [logs, setLogs] = useState([]);
-  const [animIds, setAnimIds] = useState(new Set()); // 방금 획득한 카드 id
+  const [animIds, setAnimIds] = useState(new Set());
+  const [audioReady, setAudioReady] = useState(false);
   const sz = useCardSize();
+
+  // 모바일: 첫 터치에서 AudioContext 활성화
+  useEffect(() => {
+    const unlock = () => {
+      initAudio();
+      setAudioReady(true);
+      document.removeEventListener('touchstart', unlock);
+      document.removeEventListener('mousedown', unlock);
+    };
+    document.addEventListener('touchstart', unlock, { once: true });
+    document.addEventListener('mousedown', unlock, { once: true });
+    return () => {
+      document.removeEventListener('touchstart', unlock);
+      document.removeEventListener('mousedown', unlock);
+    };
+  }, []);
 
   const addLog = useCallback((msg) => setLogs(l => [msg, ...l].slice(0, 5)), []);
 

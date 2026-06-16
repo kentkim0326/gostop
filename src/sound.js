@@ -1,6 +1,22 @@
 let ctx = null;
+
+// 모바일 브라우저: 첫 터치에서 AudioContext 활성화
+export function initAudio() {
+  try {
+    if (!ctx) {
+      ctx = new (window.AudioContext || window.webkitAudioContext)();
+    }
+    if (ctx.state === 'suspended') {
+      ctx.resume();
+    }
+  } catch(e) {}
+}
+
 function getCtx() {
-  if (!ctx) ctx = new (window.AudioContext || window.webkitAudioContext)();
+  if (!ctx) {
+    ctx = new (window.AudioContext || window.webkitAudioContext)();
+  }
+  if (ctx.state === 'suspended') ctx.resume();
   return ctx;
 }
 
